@@ -43,7 +43,7 @@ typedef struct
     oa_uint32 period;
     oa_uint32 Heartbeatperiod;
     oa_uint8 alarm;
-    oa_uint8 phonenumber[2][PHONE_NUMBER_LEN];
+    oa_uint8 phonenumber[3][PHONE_NUMBER_LEN];
     oa_uint8 ftp[FTP_ADDR_LEN];
 }oa_wristband_parameter;
 

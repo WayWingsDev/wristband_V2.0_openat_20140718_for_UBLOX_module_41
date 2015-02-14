@@ -8,7 +8,7 @@
 
 oa_uint8 g_Alarm[15] = {0};
 oa_uint8 g_Alarm_Mode = Alarm_NULL;
-oa_uint8 g_send_count = 9;
+oa_uint8 g_send_count = 58;
 
 void oa_alarm(oa_uint8 mode)
 {
@@ -75,7 +75,7 @@ void oa_alarm(oa_uint8 mode)
 
 void oa_alarm_check(void)
 {
-    ALARM_Debug("Alarm");
+    ALARM_Debug("Alarm:%d", g_Alarm_Mode);
     
     switch (g_Alarm_Mode)
     {

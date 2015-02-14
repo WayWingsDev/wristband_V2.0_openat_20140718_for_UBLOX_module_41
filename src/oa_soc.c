@@ -383,7 +383,7 @@ void oa_gprs_data_handler(oa_uint8 *pData, oa_uint16 pLen)
         case OA_COMM_BANDPHONE://bound phone number
             OA_DEBUG_USER("bound phone number");
 
-            if (pData[10] < 3)//only two bound number 1&2
+            if (pData[10] < 4)//only two bound number 1&2, add 3, can not be modefied
             {
                 oa_memset(g_oa_wristband_parameter.phonenumber[pData[10] - 1], 0, PHONE_NUMBER_LEN);
 
@@ -458,6 +458,7 @@ void oa_gprs_data_handler(oa_uint8 *pData, oa_uint16 pLen)
             if ((g_BatteryPercent >= 10)&&(g_upgrade == OA_FALSE))
             {
                 OA_DEBUG_USER("upgrade");
+                oa_enable_low_power_sleep(OA_FALSE);
                 GPS_Power(DOWN);
                 g_gps_poweron = OA_FALSE;
                 g_Str_GPS_GPGGA.validity = 0;
@@ -502,7 +503,8 @@ void oa_gprs_data_handler(oa_uint8 *pData, oa_uint16 pLen)
             //pData[5];
             g_Alarm_Mode = Alarm_NULL;
             g_eint_valid = 0;
-            g_send_count = 9;
+            g_send_count = 58;
+            g_DisassemblyStatus = 0;
             break;
 
         case OA_COMM_LOGINRETURN://login return

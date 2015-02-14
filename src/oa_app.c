@@ -49,7 +49,7 @@
 oa_char OA_VERSION_NO[] = "v6.1.5ep";
 //g_versionH.g_versionL
 oa_uint8 g_versionH = 0x02;
-oa_uint8 g_versionL = 0x14;
+oa_uint8 g_versionL = 0x17;
 
 oa_bool   g_upgrade             = OA_FALSE;
 oa_bool   g_gps_poweron         = OA_FALSE;
@@ -461,7 +461,7 @@ void oa_gps_handler(void)
                 }
             }
             
-            if (g_locate_count >= 10)//need test
+            if (g_locate_count >= 40)//need test
             {   
                 APP_Debug("restart GPS");
                 oa_enable_low_power_sleep(OA_FALSE);
@@ -622,7 +622,9 @@ void oa_lowpower_handler(void)
             }
             
             //>=60s&&not charging, then go into lowpower mode
-            if ((g_oa_wristband_parameter.period >= 60)&&(oa_battery_is_charger_connected() == OA_FALSE))
+            if (  (g_oa_wristband_parameter.period >= 60)
+                &&(oa_battery_is_charger_connected() == OA_FALSE)
+                &&(g_oa_wristband_parameter.mode == 0))
             {
                 APP_Debug(">=60");
                 oa_current_led(LED_NULL);//
@@ -638,7 +640,8 @@ void oa_lowpower_handler(void)
         }
         else if (main_loop > 16)
         {
-            if (oa_battery_is_charger_connected() == OA_FALSE)//not charging
+            if (  (oa_battery_is_charger_connected() == OA_FALSE)
+                &&(g_oa_wristband_parameter.mode == 0))
             {
                 main_loop = 0;
             }
@@ -848,6 +851,23 @@ void oa_app_init(void)
     }
 }
 
+void oa_eint(void* param)
+{
+    if (g_DisassemblyStatus == 1)
+    {
+        oa_enable_low_power_sleep(OA_FALSE);
+        if (g_main_period != 1)
+        {
+            OA_DEBUG_USER("oa_eint");//just for test, can not use it
+            g_main_period = 1;
+            oa_timer_stop(OA_TIMER_ID_1);
+            oa_timer_start(OA_TIMER_ID_1, oa_app_scheduler_entry, NULL, 1000);
+        }
+    }
+    
+    oa_timer_start(OA_TIMER_ID_6, oa_eint, NULL, 1000);
+}
+
 void oa_app_main(void)
 {
     APP_Debug("oa_app_main startup");
@@ -860,6 +880,7 @@ void oa_app_main(void)
     //oa_timer_start(OA_TIMER_ID_6, oa_feed_watchdog, NULL, 1000);
     
     oa_timer_start(OA_TIMER_ID_1, oa_app_scheduler_entry, NULL, 3000);
+    oa_timer_start(OA_TIMER_ID_6, oa_eint, NULL, 4000);
 }
 
 void oa_app_hw_init(void)

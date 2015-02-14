@@ -12,14 +12,12 @@ oa_uint8 g_eint_valid = 0x00;
 
 void oa_eint_handler(void)
 {
-    //OA_DEBUG_USER("oa_eint_handler");//just for test, can not use it
+    OA_DEBUG_USER("oa_eint_handler");//just for test, can not use it
     g_eint_valid = 1;
     g_DisassemblyStatus = 1;
     
     if (g_oa_wristband_parameter.alarm)
     {
-        oa_enable_low_power_sleep(OA_FALSE);
-        g_main_period = 1;
         g_Alarm_Mode = Alarm_Destroy;
     }
 }

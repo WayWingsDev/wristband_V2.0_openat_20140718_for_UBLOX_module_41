@@ -1849,7 +1849,7 @@ oa_bool oa_band_number_check(oa_char *deliver_num)
 
     deliver_num += deliver_num_len - 11;
     
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < 3; i++)
     {
         if (0 == oa_strcmp(g_oa_wristband_parameter.phonenumber[i], deliver_num))
         {
@@ -1985,6 +1985,7 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
                 if ((g_BatteryPercent >= 10)&&(g_upgrade == OA_FALSE))
                 {
                     OA_DEBUG_USER("#升级");
+                    oa_enable_low_power_sleep(OA_FALSE);
                     GPS_Power(DOWN);
                     g_gps_poweron = OA_FALSE;
                     g_Str_GPS_GPGGA.validity = 0;
@@ -2018,6 +2019,22 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
                 g_oa_wristband_parameter.alarm = 0;
                 oa_soc_setting_save(SETTING_WRISTBAND);
             }
+            else if (0 == oa_strcmp((oa_char *)rawData, "#自动模式"))
+            {
+                OA_DEBUG_USER("#自动模式");
+                g_oa_wristband_parameter.mode = 0;
+                oa_soc_setting_save(SETTING_WRISTBAND);
+            }
+            else if (0 == oa_strcmp((oa_char *)rawData, "#在线模式"))
+            {
+                OA_DEBUG_USER("#在线模式");
+                g_oa_wristband_parameter.mode = 1;
+                oa_soc_setting_save(SETTING_WRISTBAND);
+                oa_enable_low_power_sleep(OA_FALSE);
+                g_main_period = 1;
+                main_loop = 0;
+                oa_timer_start(OA_TIMER_ID_1, oa_app_scheduler_entry, NULL, 1000);
+            }
             else
             {
             }
@@ -2027,6 +2044,13 @@ oa_bool oa_sms_rcv_ind_handler(oa_char * deliver_num, oa_char * timestamp, oa_ui
     		/*handle 8-bit sms text.*/
     		OA_DEBUG_USER("SMS with 8-bit text.");
     	}
+    }
+    else
+    {
+        oa_sms_send(deliver_num, 
+                    "Please band your phone number!", 
+                    oa_strlen((oa_char *)"Please band your phone number!"),
+                    OA_SMSAL_DEFAULT_DCS);
     }
 
 	return OA_TRUE;/*delete current SMS from memory*/
@@ -2043,7 +2067,7 @@ void oa_sms_handler_for_wristband(oa_sms_for_wristband mode)
 {
     oa_char sendStr[300]={0};
     oa_char sendUcs2Str[150]={0};
-    oa_char workmode[3][10] = {"自动","卫星","基站"};
+    oa_char workmode[3][10] = {"自动","在线","保留"};
     oa_char chargingstatus[2][10] = {"未充电","充电"};
     oa_char disassemblystatus[2][10] = {"未拆解","拆解"};
     oa_char loginstatus[5][10] = {"未登录","未登录","未登录","登录","未登录"};
