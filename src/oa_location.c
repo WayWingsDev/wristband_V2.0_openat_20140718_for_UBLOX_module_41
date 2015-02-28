@@ -344,7 +344,11 @@ void oa_location(void)
             g_lbs_pre_next_same = 0;
         }
 #endif        
-        oa_save_lbs();
+        //if get more than 3 LBS data, then update, otherwise use old LBS data, avoiding LBS locating error!!!
+        if (g_oa_at_cced_NO > 3)
+        {
+            oa_save_lbs();
+        }
 
         for (i = 0; i < g_oa_at_cced_NO; i++)
         {

@@ -49,7 +49,7 @@
 oa_char OA_VERSION_NO[] = "v6.1.5ep";
 //g_versionH.g_versionL
 oa_uint8 g_versionH = 0x02;
-oa_uint8 g_versionL = 0x17;
+oa_uint8 g_versionL = 0x18;
 
 oa_bool   g_upgrade             = OA_FALSE;
 oa_bool   g_gps_poweron         = OA_FALSE;
