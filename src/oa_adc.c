@@ -62,63 +62,98 @@ oa_int32 average(oa_int32 data[], oa_uint8 low, oa_uint8 high)
     return sum/(high - low + 1);
 }
 
-void oa_battery_check(oa_uint32 adc_voltage)
+void oa_battery_check(oa_uint32 adc_voltage, oa_uint8 mode)
 {
-    if (adc_voltage >= 4200000)
+    if (mode == OA_DISCHARGING)
     {
-        g_BatteryPercent = 100;
-    }
-    else if (adc_voltage >= 4060000)
-    {
-        g_BatteryPercent = 90;
-    }
-    else if (adc_voltage >= 3980000)
-    {
-        g_BatteryPercent = 80;
-    }
-    else if (adc_voltage >= 3920000)
-    {
-        g_BatteryPercent = 70;
-    }
-    else if (adc_voltage >= 3870000)
-    {
-        g_BatteryPercent = 60;
-    }
-    else if (adc_voltage >= 3820000)
-    {
-        g_BatteryPercent = 50;
-    }
-    else if (adc_voltage >= 3790000)
-    {
-        g_BatteryPercent = 40;
-    }
-    else if (adc_voltage >= 3770000)
-    {
-        g_BatteryPercent = 30;
-    }
-    else if (adc_voltage >= 3740000)
-    {
-        g_BatteryPercent = 20;
-    }
-    else if (adc_voltage >= 3680000)
-    {
-        g_BatteryPercent = 10;
-        if (Alarm_NULL == g_Alarm_Mode)
+        if (adc_voltage > 4060000)
         {
-            g_Alarm_Mode = Alarm_Low_Battery;
+            g_BatteryPercent = 100;
         }
-    }
-    else if (adc_voltage >= 3450000)
-    {
-        g_BatteryPercent = 5;
-        if (Alarm_NULL == g_Alarm_Mode)
+        else if (adc_voltage > 3980000)
         {
-            g_Alarm_Mode = Alarm_Low_Battery_ShutDown;
+            g_BatteryPercent = 90;
         }
+        else if (adc_voltage > 3920000)
+        {
+            g_BatteryPercent = 80;
+        }
+        else if (adc_voltage > 3870000)
+        {
+            g_BatteryPercent = 70;
+        }
+        else if (adc_voltage > 3820000)
+        {
+            g_BatteryPercent = 60;
+        }
+        else if (adc_voltage > 3790000)
+        {
+            g_BatteryPercent = 50;
+        }
+        else if (adc_voltage > 3770000)
+        {
+            g_BatteryPercent = 40;
+        }
+        else if (adc_voltage > 3740000)
+        {
+            g_BatteryPercent = 30;
+        }
+        else if (adc_voltage > 3680000)
+        {
+            g_BatteryPercent = 20;
+            if (Alarm_NULL == g_Alarm_Mode)
+            {
+                g_Alarm_Mode = Alarm_Low_Battery;
+            }
+        }
+        else if (adc_voltage > 3450000)
+        {
+            g_BatteryPercent = 10;
+            if (Alarm_NULL == g_Alarm_Mode)
+            {
+                g_Alarm_Mode = Alarm_Low_Battery_ShutDown;
+            }
+        }
+        else
+        {
+            g_BatteryPercent = 0;
+        }
+
     }
-    else
+    else if (mode == OA_CHARGING)
     {
-        g_BatteryPercent = 0;
+        if (OA_TRUE == oa_is_full())
+        {
+            g_BatteryPercent = 100;
+        }
+        else if (adc_voltage > 4120000)
+        {
+            g_BatteryPercent = 90;
+        }
+        else if (adc_voltage > 4000000)
+        {
+            g_BatteryPercent = 70;
+        }
+        else if (adc_voltage > 3950000)
+        {
+            g_BatteryPercent = 50;
+        }
+        else if (adc_voltage > 3900000)
+        {
+            g_BatteryPercent = 35;
+        }
+        else if (adc_voltage > 3850000)
+        {
+            g_BatteryPercent = 20;
+        }
+        else if (adc_voltage > 3800000)
+        {
+            g_BatteryPercent = 10;
+        }
+        else
+        {
+            g_BatteryPercent = 1;
+        }
     }
 }
 
@@ -137,7 +172,6 @@ void oa_adc_voltage_check(void)
     {
         bubblesort(g_ADC_Voltage_Table, ADC_VOLTAGE_NUMBER);
         adc_voltage = average(g_ADC_Voltage_Table, 1, ADC_VOLTAGE_NUMBER - 2);
-        oa_battery_check(adc_voltage);
         n = 0;
         ADC_Debug("adc_voltage=%d", adc_voltage);
     }
@@ -145,6 +179,7 @@ void oa_adc_voltage_check(void)
     if (oa_battery_is_charger_connected() == OA_TRUE)
     {
         ADC_Debug("charging");
+        oa_battery_check(adc_voltage, OA_CHARGING);
         
         if ((charging == OA_FALSE)&&(Alarm_NULL == g_Alarm_Mode))
         {
@@ -168,6 +203,7 @@ void oa_adc_voltage_check(void)
     }
     else
     {
+        oa_battery_check(adc_voltage, OA_DISCHARGING);
         if ((charging == OA_TRUE)&&(Alarm_NULL == g_Alarm_Mode))
         {
             g_Alarm_Mode = Alarm_Stop_Charging;

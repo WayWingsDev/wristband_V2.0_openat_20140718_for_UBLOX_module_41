@@ -14,6 +14,12 @@ typedef struct
 }oa_adc_set_parameter;
 #endif
 
+typedef enum
+{
+    OA_DISCHARGING = 0,
+    OA_CHARGING
+}OA_BAT_MODE;
+
 extern oa_uint8 g_BatteryPercent;
 extern oa_uint32 adc_voltage;
 //extern oa_bool  g_LowBatShutDownGPS;
